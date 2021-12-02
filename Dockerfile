@@ -15,7 +15,7 @@ COPY ["ShowRoom3DTypeScript/tsconfig.json", "ShowRoom3DTypeScript/"]
 WORKDIR "/src/ShowRoom3DTypeScript"
 RUN npm install
 
-COPY ["ShowRoom3DTypeScript.csproj", "ShowRoom3DTypeScript/"]
+COPY ["ShowRoom3DTypeScript.csproj", "."]
 RUN dotnet restore "ShowRoom3DTypeScript.csproj"
 
 COPY . .
