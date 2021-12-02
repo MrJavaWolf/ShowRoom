@@ -21,6 +21,20 @@ function createScene(engine, canvas) {
         pants.rotation.x = 0;
         pants.rotation.y = Math.PI;
         pants.rotation.z = 0;
+        //var pantsMaterial = new BABYLON.StandardMaterial("pantsMaterial", scene);
+        //pantsMaterial.diffuseColor = new BABYLON.Color3(0.5, 0, 0.7);
+        //pantsMaterial.specularColor = new BABYLON.Color3(0.15, 0.15, 0.15);
+        //pantsMaterial.emissiveColor = new BABYLON.Color3(0, 0, 0);
+        //pants.material = pantsMaterial;
+        var pbr = new BABYLON.PBRMaterial("pantsMaterial", scene);
+        pants.material = pbr;
+        pbr.albedoColor = new BABYLON.Color3(0.7, 0, 0.7);
+        pbr.metallic = 0.2;
+        pbr.roughness = 0.5;
+        pbr.sheen.isEnabled = true;
+        pbr.sheen.linkSheenWithAlbedo = false;
+        pbr.sheen.intensity = 0.4;
+        pbr.sheen.color = new BABYLON.Color3(0.9372549019607843, 0.9803921568627451, 0.8549019607843137);
     });
     return scene;
 }
