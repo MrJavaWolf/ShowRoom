@@ -12,10 +12,7 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
 
     // Camera
     const camera = AddCamera(scene, canvas);
-
-    // Create a built-in "ground" shape; its constructor takes 6 params : name, width, height, subdivision, scene, updatable
-    var ground = BABYLON.Mesh.CreateGround('ground1', 6, 6, 2, scene, false);
-    ground.setEnabled(true);
+    AddSkyBox(scene);
 
 
     BABYLON.SceneLoader.Append("models/", "Pants_sculpt.obj", scene, function (scene) {
@@ -34,15 +31,22 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
 }
 
 function AddCamera(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
-    let pointTarget = new BABYLON.Vector3(0, 1, 0)
-    const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 7, pointTarget, scene);
+    let pointTarget = new BABYLON.Vector3(0, 1.3, 0)
+    const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2, 7, pointTarget.clone(), scene);
     camera.attachControl(canvas, true);
     // Target the camera to scene origin
-    camera.lockedTarget = pointTarget;
+    camera.lockedTarget = pointTarget.clone();
     camera.allowUpsideDown = false;
     camera.lowerRadiusLimit = 2;
     camera.upperRadiusLimit = 7;
+    camera.radius = 4;
     camera.wheelPrecision = 65;
+    camera.pinchPrecision = 150;
+    camera.target = pointTarget.clone();
+    camera.angularSensibilityX = 3000;
+    camera.angularSensibilityY = 3000;
+    
+    
     // Attach the camera to the canvas
     camera.attachControl(canvas, false);
 
@@ -56,10 +60,27 @@ function AddCamera(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
         cameraLight.position = global_position;
 
         cameraLight.setDirectionToTarget((new BABYLON.Vector3(0, 0, 0)).subtract(global_position));
-        //console.log("global_position: " + global_position + ", camera position: " + camera.position);
+        if (camera.target.x !== pointTarget.x ||
+            camera.target.y !== pointTarget.y ||
+            camera.target.z !== pointTarget.z) {
+            camera.target = pointTarget.clone();
+        }
+        console.log("camera.targetScreenOffset: " + camera.targetScreenOffset);
     })
 
     return camera;
+}
+
+function AddSkyBox(scene: BABYLON.Scene) {
+    // Skybox
+    var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 200.0 }, scene);
+    var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+    skyboxMaterial.backFaceCulling = false;
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("backgrounds/Vasa/", scene);
+    skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+    skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+    skybox.material = skyboxMaterial;
 }
 
 function AddTorusKnot(scene: BABYLON.Scene) {

@@ -49,7 +49,6 @@
 
   <ItemGroup>
     <Folder Include="node_modules\" />
-    <Folder Include="wwwroot\backgrounds\" />
   </ItemGroup>
 
 </Project>
