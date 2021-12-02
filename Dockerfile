@@ -10,8 +10,9 @@ RUN apt update && apt install -y nodejs npm
 WORKDIR /src
 
 COPY ["ShowRoom3DTypeScript/ShowRoom3DTypeScript.csproj", "ShowRoom3DTypeScript/"]
+RUN dotnet restore "ShowRoom3DTypeScript/ShowRoom3DTypeScript.csproj"
+
 WORKDIR "/src/ShowRoom3DTypeScript"
-RUN dotnet restore "ShowRoom3DTypeScript.csproj"
 
 COPY . .
 RUN npm install
