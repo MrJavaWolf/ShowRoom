@@ -27,7 +27,6 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
         pants.rotation.x = 0;
         pants.rotation.y = Math.PI;
         pants.rotation.z = 0;
-        console.log("Found pants: " + pants);
     });
 
 
