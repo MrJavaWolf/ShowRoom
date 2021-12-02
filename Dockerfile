@@ -6,6 +6,7 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+RUN apt install nodejs
 WORKDIR /src
 COPY ["ShowRoom3DTypeScript/ShowRoom3DTypeScript.csproj", "ShowRoom3DTypeScript/"]
 RUN dotnet restore "ShowRoom3DTypeScript/ShowRoom3DTypeScript.csproj"
