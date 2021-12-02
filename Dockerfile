@@ -9,7 +9,6 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 RUN apt update && apt install -y nodejs npm
 WORKDIR /src
 
-
 COPY ["ShowRoom3DTypeScript/package.json", "ShowRoom3DTypeScript/"]
 COPY ["ShowRoom3DTypeScript/tsconfig.json", "ShowRoom3DTypeScript/"]
 WORKDIR "/src/ShowRoom3DTypeScript"
@@ -17,6 +16,7 @@ RUN npm install
 
 WORKDIR /src
 COPY ["ShowRoom3DTypeScript/ShowRoom3DTypeScript.csproj", "ShowRoom3DTypeScript/"]
+WORKDIR "/src/ShowRoom3DTypeScript"
 RUN dotnet restore "ShowRoom3DTypeScript.csproj"
 
 COPY . .
