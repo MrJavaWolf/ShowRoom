@@ -9,15 +9,16 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 RUN apt update && apt install -y nodejs npm
 WORKDIR /src
 
+
 COPY ["ShowRoom3DTypeScript/package.json", "ShowRoom3DTypeScript/"]
 COPY ["ShowRoom3DTypeScript/tsconfig.json", "ShowRoom3DTypeScript/"]
+WORKDIR "/src/ShowRoom3DTypeScript"
 RUN npm install
 
-COPY ["ShowRoom3DTypeScript/ShowRoom3DTypeScript.csproj", "ShowRoom3DTypeScript/"]
-RUN dotnet restore "ShowRoom3DTypeScript/ShowRoom3DTypeScript.csproj"
+COPY ["ShowRoom3DTypeScript.csproj", "ShowRoom3DTypeScript/"]
+RUN dotnet restore "ShowRoom3DTypeScript.csproj"
 
 COPY . .
-WORKDIR "/src/ShowRoom3DTypeScript"
 
 RUN dotnet build "ShowRoom3DTypeScript.csproj" -c Release -o /app/build
 
