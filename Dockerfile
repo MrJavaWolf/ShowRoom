@@ -11,10 +11,9 @@ WORKDIR /src
 
 COPY ["ShowRoom3DTypeScript/ShowRoom3DTypeScript.csproj", "ShowRoom3DTypeScript/"]
 RUN dotnet restore "ShowRoom3DTypeScript/ShowRoom3DTypeScript.csproj"
-
+COPY . .
 WORKDIR "/src/ShowRoom3DTypeScript"
 
-COPY . .
 RUN npm install
 RUN dotnet build "ShowRoom3DTypeScript.csproj" -c Release -o /app/build
 
