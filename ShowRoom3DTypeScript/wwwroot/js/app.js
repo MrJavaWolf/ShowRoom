@@ -6,9 +6,10 @@ function createScene(engine, canvas) {
     // Create a basic BJS Scene object
     var scene = new BABYLON.Scene(engine);
     // Create a basic light, aiming 0, 1, 0 - meaning, to the sky
-    var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(1, 1, 0.8), scene);
-    var bounceLight = new BABYLON.HemisphericLight('bouncelight1', new BABYLON.Vector3(-1, -1, -0.8), scene);
-    bounceLight.intensity = 0.5;
+    var hemisphericLight = new BABYLON.HemisphericLight('HemisphericLight1', new BABYLON.Vector3(1, 1, 0.8), scene);
+    hemisphericLight.intensity = 0.2;
+    //var bounceLight = new BABYLON.HemisphericLight('bouncelight1', new BABYLON.Vector3(-1, -1, -0.8), scene);
+    //bounceLight.intensity = 0.5;
     // Camera
     var camera = AddCamera(scene, canvas);
     AddSkyBox(scene);
@@ -57,10 +58,11 @@ function AddCamera(scene, canvas) {
     camera.attachControl(canvas, false);
     // Add camera light
     var cameraLight = new BABYLON.SpotLight('cameraLight1', new BABYLON.Vector3(0.5, 0.5, 0), new BABYLON.Vector3(0, 0, 0), 1, 40, scene);
+    cameraLight.intensity = 150;
     scene.onBeforeRenderObservable.add(function () {
         var matrix = camera.computeWorldMatrix();
-        var local_position = new BABYLON.Vector3(3, 5, 0);
-        var global_position = BABYLON.Vector3.TransformCoordinates(local_position, matrix);
+        var offset = new BABYLON.Vector3(3, 5, 0);
+        var global_position = BABYLON.Vector3.TransformCoordinates(offset, matrix);
         cameraLight.position = global_position;
         cameraLight.setDirectionToTarget((new BABYLON.Vector3(0, 0, 0)).subtract(global_position));
         if (camera.target.x !== pointTarget.x ||
@@ -70,6 +72,14 @@ function AddCamera(scene, canvas) {
         }
         console.log("camera.targetScreenOffset: " + camera.targetScreenOffset);
     });
+    // Add camera rim light
+    var rimLight = new BABYLON.PointLight('rimLight1', camera.position.clone(), scene);
+    rimLight.intensity = 200;
+    rimLight.radius = 100;
+    rimLight.range = 100;
+    rimLight.position = new BABYLON.Vector3(-camera.position.x + 1.3, -camera.position.y + 2.5, -camera.position.z);
+    ;
+    rimLight.parent = camera;
     return camera;
 }
 function AddSkyBox(scene) {
