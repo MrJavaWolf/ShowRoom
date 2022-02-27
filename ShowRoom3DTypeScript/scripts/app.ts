@@ -1,5 +1,7 @@
 ﻿import * as BABYLON from 'babylonjs';
 import 'babylonjs-loaders'
+import * as GUI from 'babylonjs-gui';
+
 
 function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
     // Create a basic BJS Scene object
@@ -16,34 +18,49 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
     AddSkyBox(scene);
 
 
-    BABYLON.SceneLoader.Append("models/", "Pants_sculpt.obj", scene, function (scene) {
+    BABYLON.SceneLoader.Append("models/Pants2/", "pants_base_mesh.obj", scene, function (scene) {
         // do something with the scene
-        var pants = scene.getMeshByName("pasted__pasted__pasted__Body_mesh1");
+        var pants = scene.getMeshByName("pants_base_mesh");
         pants.scaling.x = 0.01;
         pants.scaling.y = 0.01;
         pants.scaling.z = 0.01;
         pants.rotation.x = 0;
         pants.rotation.y = Math.PI;
         pants.rotation.z = 0;
-        //var pantsMaterial = new BABYLON.StandardMaterial("pantsMaterial", scene);
-        //pantsMaterial.diffuseColor = new BABYLON.Color3(0.5, 0, 0.7);
-        //pantsMaterial.specularColor = new BABYLON.Color3(0.15, 0.15, 0.15);
-        //pantsMaterial.emissiveColor = new BABYLON.Color3(0, 0, 0);
-        //pants.material = pantsMaterial;
 
-        var pbr = new BABYLON.PBRMaterial("pantsMaterial", scene);
-        pants.material = pbr;
-        pbr.albedoColor = new BABYLON.Color3(0.7, 0, 0.7);
-        pbr.metallic = 0.2;
-        pbr.roughness = 0.5;
-        pbr.sheen.isEnabled = true;
-        pbr.sheen.linkSheenWithAlbedo = false;
-        pbr.sheen.intensity = 0.4;
-        pbr.sheen.color = new BABYLON.Color3(0.9372549019607843, 0.9803921568627451, 0.8549019607843137);
+        var baseMaterial = new BABYLON.PBRMaterial("pantsMaterial", scene);
+        baseMaterial.metallic = 0.2;
+        baseMaterial.roughness = 0.5;
+
+        pants.material = baseMaterial;
+        UpdatePantsTexture(scene, "models/Custom_pants/pants_body_texture_FXXXER.png", new BABYLON.Color3(1, 0, 0));
     });
-
-
+    AddUI(scene);
     return scene;
+}
+
+function UpdatePantsTexture(scene: BABYLON.Scene, featureTexture: string, featureColor: BABYLON.Color3) {
+    let baseMaterial = scene.getMaterialByName("pantsMaterial") as BABYLON.PBRMaterial;
+    const baseTexture = new BABYLON.Texture("models/Custom_pants/pants_body_texture.png", scene, null, null, null, function () {
+        const feature1Texture = new BABYLON.Texture(featureTexture, scene, null, null, null, function () {
+            let size = baseTexture.getSize();
+            let dataArray = new Uint8Array(size.width * size.height * 4);
+            //AddToTexture(baseTexture.readPixels(), new BABYLON.Color3(1, 0, 0), dataArray);
+            AddToTexture(feature1Texture.readPixels(), featureColor, dataArray);
+            baseMaterial.albedoTexture = BABYLON.RawTexture.CreateRGBATexture(dataArray, size.width, size.height, scene);
+        })
+    });
+}
+
+
+function AddToTexture(pixels: ArrayBufferView, color: BABYLON.Color3, dataArray: Uint8Array) {
+    for (let i = 0; i < dataArray.length; i += 4) {
+        let alfa = pixels[i + 3] / 255;
+        dataArray[i] += color.r * 255 * alfa;
+        dataArray[i + 1] += color.g * 255 * alfa;
+        dataArray[i + 2] += color.b * 255 * alfa;
+        dataArray[i + 3] = 255;
+    }
 }
 
 function AddCamera(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
@@ -61,7 +78,6 @@ function AddCamera(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
     camera.target = pointTarget.clone();
     camera.angularSensibilityX = 3000;
     camera.angularSensibilityY = 3000;
-
 
     // Attach the camera to the canvas
     camera.attachControl(canvas, false);
@@ -82,7 +98,6 @@ function AddCamera(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
             camera.target.z !== pointTarget.z) {
             camera.target = pointTarget.clone();
         }
-        console.log("camera.targetScreenOffset: " + camera.targetScreenOffset);
     })
 
     // Add camera rim light
@@ -90,9 +105,8 @@ function AddCamera(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
     rimLight.intensity = 200;
     rimLight.radius = 100;
     rimLight.range = 100;
-    rimLight.position = new BABYLON.Vector3(-camera.position.x + 1.3, -camera.position.y + 2.5, -camera.position.z);;
+    rimLight.position = new BABYLON.Vector3((-camera.position.x * 2) + 1.3, -(camera.position.y * 2) + 2.5, - (camera.position.z * 2));;
     rimLight.parent = camera;
-
 
     return camera;
 }
@@ -121,7 +135,31 @@ function AddTorusKnot(scene: BABYLON.Scene) {
     return torusKnot;
 }
 
-function changeColor(scene: BABYLON.Scene, color: string) {
-    var myMaterial = <BABYLON.StandardMaterial>scene.getMaterialByName("myMaterial");
-    myMaterial.diffuseColor = BABYLON.Color3.FromHexString(color);
+function AddUI(scene: BABYLON.Scene) {
+
+    // GUI
+   //var advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+    
+    //var panel = new GUI.StackPanel();
+    //panel.width = "200px";
+    //panel.isVertical = true;
+    //panel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+    //panel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+    //advancedTexture.addControl(panel);
+
+    //var textBlock = new GUI.TextBlock();
+    //textBlock.text = "Diffuse color:";
+    //textBlock.height = "30px";
+    //panel.addControl(textBlock);
+
+    //var picker = new GUI.ColorPicker();
+    //picker.value = new BABYLON.Color3(1, 0, 0);
+    //picker.height = "150px";
+    //picker.width = "150px";
+    //picker.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    //picker.onValueChangedObservable.add(function (value) { // value is a color3
+    //    UpdatePantsTexture(scene, "models/Custom_pants/pants_body_texture_FXXXER.png", value);
+    //});
+
+    //panel.addControl(picker);
 }

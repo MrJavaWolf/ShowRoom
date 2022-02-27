@@ -21,26 +21,29 @@
         }
     </style>
 
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
-    <script src="https://cdn.babylonjs.com/loaders/babylon.objFileLoader.min.js"></script>
+    @*<script src="https://cdn.babylonjs.com/babylon.js"></script>
+        <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+        <script src="https://cdn.babylonjs.com/loaders/babylon.objFileLoader.min.js"></script>
+        <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>*@
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
     <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+    <script src="https://preview.babylonjs.com/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+    <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+    <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+
     <script>var exports = {};</script>
 </head>
 
 <body style="background-color:#222222">
-    <select id="colorSelector" name="Color">
-        <option value="#FFFFFF">White</option>
-        <option value="#808080">Black</option>
-        <option value="#FF0000">Red</option>
-        <option value="#00FF00">Green</option>
-        <option value="#0000FF" selected>Blue</option>
-    </select>
+
     <canvas id="renderCanvas" touch-action="none"></canvas> <!-- touch-action="none" for best results from PEP -->
 
     <script src="~/js/app.js"></script>
 
-    <script type="module" >
+    <script type="module">
         var exports = {};
         // Get the canvas DOM element
         var canvas = document.getElementById('renderCanvas');
@@ -56,10 +59,6 @@
         // the canvas/window resize event handler
         window.addEventListener('resize', function () {
             engine.resize();
-        });
-
-        document.getElementById("colorSelector").addEventListener("change", function () {
-            changeColor(scene, this.value);
         });
 
     </script>

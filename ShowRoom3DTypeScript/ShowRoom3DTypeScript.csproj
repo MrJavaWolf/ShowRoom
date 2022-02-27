@@ -49,6 +49,7 @@
 
   <ItemGroup>
     <Folder Include="node_modules\" />
+    <Folder Include="wwwroot\js\" />
   </ItemGroup>
 
 </Project>

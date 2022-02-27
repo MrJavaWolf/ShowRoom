@@ -5,13 +5,19 @@
     "noEmitOnError": true,
     "removeComments": false,
     "sourceMap": true,
-    "target": "es5",
-    "outDir": "wwwroot/js"
+    "target": "ES5",
+    "outDir": "wwwroot/js",
+    "lib": [
+      "dom",
+      "es2015.promise",
+      "es5"
+    ]
   },
   "include": [
     "scripts/**/*"
   ],
   "types": [
-    "babylonjs"
+    "babylonjs",
+    "babylonjs-gui"
   ]
 }

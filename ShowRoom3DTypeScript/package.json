@@ -6,7 +6,9 @@
     "@types/node": "^16.11.11"
   },
   "dependencies": {
-    "babylonjs": "^4.2.0",
+    "babylonjs": "^4.2.1",
+    "babylonjs-gui": "^4.2.1",
+    "babylonjs-loaders": "^4.2.1",
     "typescript": "^4.0.6"
   }
 }
