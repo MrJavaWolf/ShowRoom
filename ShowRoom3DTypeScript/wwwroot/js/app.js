@@ -28,31 +28,35 @@ function createScene(engine, canvas) {
         //baseMaterial.sheen.isEnabled = true;
         //baseMaterial.albedoTexture = new BABYLON.Texture("models/Pants2/texture_pants.png", scene);
         pants.material = baseMaterial;
-        UpdatePantsTexture(scene, "models/Pants2/texture_fxxxer.png", new BABYLON.Color3(1, 0, 0));
+        UpdatePantsTexture(scene);
     });
     AddUI(scene);
-    // Show inspector.
-    scene.debugLayer.show({
-        embedMode: true,
-        enablePopup: true,
-        overlay: true,
-        showExplorer: true,
-        showInspector: true
-    });
+    //// Show inspector.
+    //scene.debugLayer.show({
+    //    embedMode: true,
+    //    enablePopup: true,
+    //    overlay: true,
+    //    showExplorer: true,
+    //    showInspector: true
+    //});
     return scene;
 }
-function UpdatePantsTexture(scene, featureTexture, featureColor) {
-    if (!window.BaseTexture || !window.Feature1Texture) {
+function UpdatePantsTexture(scene) {
+    if (!window.BaseTexture || !window.PipingTexture1 || !window.PipingTexture2) {
         window.BaseTexture = new BABYLON.Texture("models/Pants2/texture_pants.png", scene, null, null, null, function () {
-            window.Feature1Texture = new BABYLON.Texture(featureTexture, scene, null, null, null, function () {
-                window.BaseTextureData = window.BaseTexture.readPixels();
-                window.Feature1TextureData = window.Feature1Texture.readPixels();
-                UpdatePantsTexture_Private(scene, window.Feature1TextureData, featureColor);
+            window.PipingTexture1 = new BABYLON.Texture("models/Pants2/texture_fxxxer.png", scene, null, null, null, function () {
+                window.PipingTexture2 = new BABYLON.Texture("models/Pants2/texture_indecator.png", scene, null, null, null, function () {
+                    window.BaseTextureData = window.BaseTexture.readPixels();
+                    window.PipingTexture1Data = window.PipingTexture1.readPixels();
+                    window.PipingTexture2Data = window.PipingTexture2.readPixels();
+                    window.SelectedPipingData = window.PipingTexture1Data;
+                    UpdatePantsTexture_Private(scene, window.SelectedPipingData, window.SelectedPipingColor);
+                });
             });
         });
     }
     else {
-        UpdatePantsTexture_Private(scene, window.Feature1TextureData, featureColor);
+        UpdatePantsTexture_Private(scene, window.SelectedPipingData, window.SelectedPipingColor);
     }
 }
 function UpdatePantsTexture_Private(scene, featureTextureData, featureColor) {
@@ -85,7 +89,7 @@ function AddToTexture(pixels, color, dataArray) {
     }
 }
 function AddCamera(scene, canvas) {
-    var pointTarget = new BABYLON.Vector3(0, 2, 0);
+    var pointTarget = new BABYLON.Vector3(0, 1.5, 0);
     var camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2, 7, pointTarget.clone(), scene);
     camera.attachControl(canvas, true);
     // Target the camera to scene origin
@@ -138,8 +142,6 @@ function AddSkyBox(scene) {
     skybox.material = skyboxMaterial;
 }
 function AddTorusKnot(scene) {
-    // Create a built-in "sphere" shape; its constructor takes 6 params: name, segment, diameter, scene, updatable, sideOrientation
-    //var box = BABYLON.Mesh.CreateSphere('box1', 10, 3, scene);
     var torusKnot = BABYLON.Mesh.CreateTorusKnot('torusKnot', 2, 0.5, 128, 128, 2, 3, scene);
     var myMaterial = new BABYLON.StandardMaterial("myMaterial", scene);
     myMaterial.diffuseColor = new BABYLON.Color3(0, 0, 1);
@@ -157,26 +159,122 @@ function AddUI(scene) {
     colorPanel.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
     colorPanel.verticalAlignment = window.BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
     advancedTexture.addControl(colorPanel);
-    var colorPicker = new window.BABYLON.GUI.ColorPicker();
-    colorPicker.value = new BABYLON.Color3(1, 0, 0);
-    colorPicker.height = "250px";
-    colorPicker.width = "250px";
-    colorPicker.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-    colorPicker.onValueChangedObservable.add(function (value) {
-        UpdatePantsTexture(scene, "models/Pants2/texture_fxxxer.png", value);
-    });
-    colorPanel.addControl(colorPicker);
+    AddMadeByLabels(advancedTexture);
+    AddChooseColorRadioGroupGui(advancedTexture, scene);
+    AddChoosePipingRadioButtonsGui(advancedTexture, scene);
+}
+function AddChoosePipingRadioButtonsGui(advancedTexture, scene) {
+    var selectBox = new window.BABYLON.GUI.SelectionPanel("ChoosePipingSelectionPanel");
+    selectBox.thickness = 1;
+    selectBox.paddingBottom = 5;
+    selectBox.paddingTop = 5;
+    selectBox.paddingLeft = 5;
+    selectBox.paddingRight = 5;
+    selectBox.background = "#111111";
+    selectBox.barColor = "#111111";
+    selectBox.shadowColor = "#111111";
+    selectBox.labelColor = "#DDDDDD";
+    selectBox.headerColor = "#DDDDDD";
+    selectBox.color = "#DDDDDD";
+    selectBox.fontStyle = "Verdana";
+    selectBox.widthInPixels = 150;
+    selectBox.heightInPixels = 150;
+    selectBox.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+    selectBox.verticalAlignment = window.BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+    var colorGroup = new window.BABYLON.GUI.RadioGroup("PipingGroup");
+    colorGroup.header = "- Piping -";
+    colorGroup.addRadio("Fxxxer", function (value) {
+        window.SelectedPipingData = window.PipingTexture1Data;
+        UpdatePantsTexture(scene);
+    }, true);
+    colorGroup.addRadio("Indicator", function (value) {
+        window.SelectedPipingData = window.PipingTexture2Data;
+        UpdatePantsTexture(scene);
+    }, false);
+    selectBox.addGroup(colorGroup);
+    advancedTexture.addControl(selectBox);
+}
+function AddChooseColorRadioGroupGui(advancedTexture, scene) {
+    var selectBox = new window.BABYLON.GUI.SelectionPanel("ChooseColorSelectionPanel");
+    selectBox.thickness = 1;
+    selectBox.paddingBottom = 5;
+    selectBox.paddingTop = 5;
+    selectBox.paddingLeft = 5;
+    selectBox.paddingRight = 5;
+    selectBox.fontSize = "35";
+    selectBox.background = "#111111";
+    selectBox.barColor = "#111111";
+    selectBox.shadowColor = "#111111";
+    selectBox.labelColor = "#DDDDDD";
+    selectBox.headerColor = "#DDDDDD";
+    selectBox.color = "#DDDDDD";
+    selectBox.fontStyle = "Verdana";
+    selectBox.heightInPixels = 200;
+    selectBox.widthInPixels = 150;
+    selectBox.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+    selectBox.verticalAlignment = window.BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+    var colorGroup = new window.BABYLON.GUI.RadioGroup("colorGroup");
+    colorGroup.header = "- Color -";
+    colorGroup.addRadio("None", function (value) {
+        window.SelectedPipingColor = new BABYLON.Color3(0, 0, 0);
+        UpdatePantsTexture(scene);
+    }, false);
+    colorGroup.addRadio("Blue", function (value) {
+        window.SelectedPipingColor = new BABYLON.Color3(0.2, 0.4, 1);
+        UpdatePantsTexture(scene);
+    }, false);
+    colorGroup.addRadio("Red", function (value) {
+        window.SelectedPipingColor = new BABYLON.Color3(1, 0, 0);
+        UpdatePantsTexture(scene);
+    }, true);
+    colorGroup.addRadio("Yellow", function (value) {
+        window.SelectedPipingColor = new BABYLON.Color3(1, 1, 0);
+        UpdatePantsTexture(scene);
+    }, false);
+    selectBox.addGroup(colorGroup);
+    advancedTexture.addControl(selectBox);
+}
+function AddMadeByLabels(advancedTexture) {
     var madeByPanel = new window.BABYLON.GUI.StackPanel();
-    madeByPanel.width = "1250px";
+    madeByPanel.width = "300px";
     madeByPanel.isVertical = true;
-    madeByPanel.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    madeByPanel.paddingBottom = 5;
+    madeByPanel.paddingTop = 5;
+    madeByPanel.paddingLeft = 5;
+    madeByPanel.paddingRight = 5;
+    madeByPanel.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
     madeByPanel.verticalAlignment = window.BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
-    advancedTexture.addControl(madeByPanel);
     var textBlock = new window.BABYLON.GUI.TextBlock();
-    textBlock.text = "Made by Jens Larsen & Ronnie Vilhelmsen - Work in progress";
-    textBlock.height = "30px";
-    textBlock.color = "#FFFFFF";
-    textBlock.fontSize = "30px";
+    textBlock.text = "Jens Larsen & Ronnie Vilhelmsen 2022";
+    textBlock.height = "15px";
+    textBlock.color = "#DDDDDD";
+    textBlock.fontSize = "15px";
+    textBlock.textHorizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
     madeByPanel.addControl(textBlock);
+    var messagePanel = new window.BABYLON.GUI.StackPanel();
+    messagePanel.paddingBottom = 5;
+    messagePanel.paddingTop = 5;
+    messagePanel.paddingLeft = 5;
+    messagePanel.paddingRight = 5;
+    messagePanel.width = "350px";
+    messagePanel.isVertical = true;
+    messagePanel.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+    messagePanel.verticalAlignment = window.BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+    var workInProgress = new window.BABYLON.GUI.TextBlock();
+    workInProgress.text = "Proof of concept";
+    workInProgress.height = "30px";
+    workInProgress.color = "#FFFFFF";
+    workInProgress.fontSize = "25px";
+    workInProgress.textHorizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+    messagePanel.addControl(workInProgress);
+    var mayChange = new window.BABYLON.GUI.TextBlock();
+    mayChange.text = "All elements are subject to change";
+    mayChange.height = "15px";
+    mayChange.color = "#FFFFFF";
+    mayChange.fontSize = "15px";
+    mayChange.textHorizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+    messagePanel.addControl(mayChange);
+    advancedTexture.addControl(madeByPanel);
+    advancedTexture.addControl(messagePanel);
 }
 //# sourceMappingURL=app.js.map
