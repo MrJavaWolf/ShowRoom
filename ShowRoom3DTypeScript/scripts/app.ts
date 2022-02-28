@@ -95,14 +95,14 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
 
     AddUI(scene);
 
-    // Show inspector.
-    scene.debugLayer.show({
-        embedMode: true,
-        enablePopup: true,
-        overlay: true,
-        showExplorer: true,
-        showInspector: true
-    });
+    //// Show inspector.
+    //scene.debugLayer.show({
+    //    embedMode: true,
+    //    enablePopup: true,
+    //    overlay: true,
+    //    showExplorer: true,
+    //    showInspector: true
+    //});
 
     return scene;
 }

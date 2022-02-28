@@ -69,14 +69,14 @@ function createScene(engine, canvas) {
         pantsLabel.material = baseMaterial;
     });
     AddUI(scene);
-    // Show inspector.
-    scene.debugLayer.show({
-        embedMode: true,
-        enablePopup: true,
-        overlay: true,
-        showExplorer: true,
-        showInspector: true
-    });
+    //// Show inspector.
+    //scene.debugLayer.show({
+    //    embedMode: true,
+    //    enablePopup: true,
+    //    overlay: true,
+    //    showExplorer: true,
+    //    showInspector: true
+    //});
     return scene;
 }
 function UpdatePantsTexture(scene) {
