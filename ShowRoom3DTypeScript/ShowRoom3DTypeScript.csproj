@@ -6,7 +6,7 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
-	<TypeScriptLib>dom,es6</TypeScriptLib>
+	<TypeScriptLib>dom,es5</TypeScriptLib>
   </PropertyGroup>
 
   <ItemGroup>

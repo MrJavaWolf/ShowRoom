@@ -2,7 +2,6 @@
 import 'babylonjs-loaders'
 import * as GUI from 'babylonjs-gui';
 
-
 function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
     // Create a basic BJS Scene object
     var scene = new BABYLON.Scene(engine);
@@ -31,9 +30,10 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
         var baseMaterial = new BABYLON.PBRMaterial("pantsMaterial", scene);
         baseMaterial.metallic = 0.2;
         baseMaterial.roughness = 0.5;
-
+        //baseMaterial.sheen.isEnabled = true;
+        //baseMaterial.albedoTexture = new BABYLON.Texture("models/Pants2/texture_pants.png", scene);
         pants.material = baseMaterial;
-        UpdatePantsTexture(scene, "models/Custom_pants/pants_body_texture_FXXXER.png", new BABYLON.Color3(1, 0, 0));
+        UpdatePantsTexture(scene, "models/Pants2/texture_fxxxer.png", new BABYLON.Color3(1, 0, 0));
     });
     AddUI(scene);
     return scene;
@@ -41,13 +41,17 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
 
 function UpdatePantsTexture(scene: BABYLON.Scene, featureTexture: string, featureColor: BABYLON.Color3) {
     let baseMaterial = scene.getMaterialByName("pantsMaterial") as BABYLON.PBRMaterial;
-    const baseTexture = new BABYLON.Texture("models/Custom_pants/pants_body_texture.png", scene, null, null, null, function () {
+    const baseTexture = new BABYLON.Texture("models/Pants2/texture_pants.png", scene, null, null, null, function () {
         const feature1Texture = new BABYLON.Texture(featureTexture, scene, null, null, null, function () {
             let size = baseTexture.getSize();
             let dataArray = new Uint8Array(size.width * size.height * 4);
-            //AddToTexture(baseTexture.readPixels(), new BABYLON.Color3(1, 0, 0), dataArray);
-            AddToTexture(feature1Texture.readPixels(), featureColor, dataArray);
+            let basePixels = baseTexture.readPixels();
+            for (let i = 0; i < dataArray.length; i++) {
+                dataArray[i] = basePixels[i];
+            }
             baseMaterial.albedoTexture = BABYLON.RawTexture.CreateRGBATexture(dataArray, size.width, size.height, scene);
+
+            //AddToTexture(feature1Texture.readPixels(), featureColor, dataArray);
         })
     });
 }
@@ -55,16 +59,16 @@ function UpdatePantsTexture(scene: BABYLON.Scene, featureTexture: string, featur
 
 function AddToTexture(pixels: ArrayBufferView, color: BABYLON.Color3, dataArray: Uint8Array) {
     for (let i = 0; i < dataArray.length; i += 4) {
-        let alfa = pixels[i + 3] / 255;
-        dataArray[i] += color.r * 255 * alfa;
-        dataArray[i + 1] += color.g * 255 * alfa;
-        dataArray[i + 2] += color.b * 255 * alfa;
+        let alfa = pixels[i + 3] / 255.0;
+        dataArray[i] += color.r * 255.0 * alfa;
+        dataArray[i + 1] += color.g * 255.0 * alfa;
+        dataArray[i + 2] += color.b * 255.0 * alfa;
         dataArray[i + 3] = 255;
     }
 }
 
 function AddCamera(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
-    let pointTarget = new BABYLON.Vector3(0, 1.3, 0)
+    let pointTarget = new BABYLON.Vector3(0, 2, 0)
     const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2, 7, pointTarget.clone(), scene);
     camera.attachControl(canvas, true);
     // Target the camera to scene origin
@@ -138,28 +142,39 @@ function AddTorusKnot(scene: BABYLON.Scene) {
 function AddUI(scene: BABYLON.Scene) {
 
     // GUI
-   //var advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-    
-    //var panel = new GUI.StackPanel();
-    //panel.width = "200px";
-    //panel.isVertical = true;
-    //panel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-    //panel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
-    //advancedTexture.addControl(panel);
+    var advancedTexture = window.BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-    //var textBlock = new GUI.TextBlock();
-    //textBlock.text = "Diffuse color:";
-    //textBlock.height = "30px";
-    //panel.addControl(textBlock);
 
-    //var picker = new GUI.ColorPicker();
-    //picker.value = new BABYLON.Color3(1, 0, 0);
-    //picker.height = "150px";
-    //picker.width = "150px";
-    //picker.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-    //picker.onValueChangedObservable.add(function (value) { // value is a color3
-    //    UpdatePantsTexture(scene, "models/Custom_pants/pants_body_texture_FXXXER.png", value);
-    //});
+    var colorPanel = new window.BABYLON.GUI.StackPanel();
+    colorPanel.width = "250px";
+    colorPanel.isVertical = true;
+    colorPanel.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+    colorPanel.verticalAlignment = window.BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+    advancedTexture.addControl(colorPanel);
 
-    //panel.addControl(picker);
+    var colorPicker = new window.BABYLON.GUI.ColorPicker();
+    colorPicker.value = new BABYLON.Color3(1, 0, 0);
+    colorPicker.height = "250px";
+    colorPicker.width = "250px";
+    colorPicker.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    colorPicker.onValueChangedObservable.add(function (value) { // value is a color3
+        UpdatePantsTexture(scene, "models/Pants2/texture_label.png", value);
+    });
+
+    colorPanel.addControl(colorPicker);
+
+
+    var madeByPanel = new window.BABYLON.GUI.StackPanel();
+    madeByPanel.width = "1250px";
+    madeByPanel.isVertical = true;
+    madeByPanel.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    madeByPanel.verticalAlignment = window.BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+    advancedTexture.addControl(madeByPanel);
+
+    var textBlock = new window.BABYLON.GUI.TextBlock();
+    textBlock.text = "Made by Jens Larsen & Ronnie Vilhelmsen - Work in progress";
+    textBlock.height = "30px";
+    textBlock.color = "#FFFFFF";
+    textBlock.fontSize = "30px";
+    madeByPanel.addControl(textBlock);
 }
