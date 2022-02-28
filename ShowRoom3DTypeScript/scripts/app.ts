@@ -2,6 +2,15 @@
 import 'babylonjs-loaders'
 import * as GUI from 'babylonjs-gui';
 
+declare global {
+    var BaseTexture: BABYLON.Texture;
+    var BaseTextureData: ArrayBufferView;
+    var Feature1Texture: BABYLON.Texture;
+    var Feature1TextureData: ArrayBufferView;
+    var PantsTexture: BABYLON.RawTexture;
+    var PantsTextureDate: Uint8Array;
+}
+
 function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
     // Create a basic BJS Scene object
     var scene = new BABYLON.Scene(engine);
@@ -40,30 +49,52 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
 }
 
 function UpdatePantsTexture(scene: BABYLON.Scene, featureTexture: string, featureColor: BABYLON.Color3) {
-    let baseMaterial = scene.getMaterialByName("pantsMaterial") as BABYLON.PBRMaterial;
-    const baseTexture = new BABYLON.Texture("models/Pants2/texture_pants.png", scene, null, null, null, function () {
-        const feature1Texture = new BABYLON.Texture(featureTexture, scene, null, null, null, function () {
-            let size = baseTexture.getSize();
-            let dataArray = new Uint8Array(size.width * size.height * 4);
-            let basePixels = baseTexture.readPixels();
-            for (let i = 0; i < dataArray.length; i++) {
-                dataArray[i] = basePixels[i];
-            }
-            baseMaterial.albedoTexture = BABYLON.RawTexture.CreateRGBATexture(dataArray, size.width, size.height, scene);
 
-            //AddToTexture(feature1Texture.readPixels(), featureColor, dataArray);
-        })
-    });
+    
+    if (!window.BaseTexture || !window.Feature1Texture) {
+        window.BaseTexture = new BABYLON.Texture("models/Pants2/texture_pants.png", scene, null, null, null, function () {
+            window.Feature1Texture = new BABYLON.Texture(featureTexture, scene, null, null, null, function () {
+                window.BaseTextureData = window.BaseTexture.readPixels();
+                window.Feature1TextureData = window.Feature1Texture.readPixels();
+                UpdatePantsTexture_Private(scene, window.Feature1TextureData, featureColor);
+            })
+        });
+    }
+    else {
+        UpdatePantsTexture_Private(scene, window.Feature1TextureData, featureColor);
+    }
 }
 
+function UpdatePantsTexture_Private(scene: BABYLON.Scene, featureTextureData: ArrayBufferView, featureColor: BABYLON.Color3) {
+   
+    if (!window.PantsTexture) {
+        let size = window.BaseTexture.getSize();
+        window.PantsTextureDate = new Uint8Array(size.width * size.height * 4);
+        window.PantsTexture = BABYLON.RawTexture.CreateRGBATexture(window.PantsTextureDate, size.width, size.height, scene, null, true);
+        window.PantsTexture.wrapU = window.BaseTexture.wrapU;
+        window.PantsTexture.wrapV = window.BaseTexture.wrapV;
+        window.PantsTexture.wrapR = window.BaseTexture.wrapR;
+        window.PantsTexture.invertZ = window.BaseTexture.invertZ;
+        let baseMaterial = scene.getMaterialByName("pantsMaterial") as BABYLON.PBRMaterial;
+        baseMaterial.albedoTexture = window.PantsTexture;
+    }
+    
+    let pantsTextureData = window.PantsTextureDate;
+    let basePixels = window.BaseTextureData;
+    for (let i = 0; i < pantsTextureData.length; i++) {
+        pantsTextureData[i] = basePixels[i];
+    }
+    AddToTexture(featureTextureData, featureColor, pantsTextureData);
+    window.PantsTexture.update(pantsTextureData);
+}
 
-function AddToTexture(pixels: ArrayBufferView, color: BABYLON.Color3, dataArray: Uint8Array) {
-    for (let i = 0; i < dataArray.length; i += 4) {
-        let alfa = pixels[i + 3] / 255.0;
-        dataArray[i] += color.r * 255.0 * alfa;
-        dataArray[i + 1] += color.g * 255.0 * alfa;
-        dataArray[i + 2] += color.b * 255.0 * alfa;
-        dataArray[i + 3] = 255;
+function AddToTexture(pixels: ArrayBufferView, color: BABYLON.Color3, dataArray: ArrayBufferView) {
+    let alfa = 0;
+    for (let i = 0; i < dataArray.byteLength; i += 4) {
+        alfa = pixels[i + 3] / 255;
+        dataArray[i] = Math.min(255, dataArray[i] + color.r * 255 * alfa);
+        dataArray[i + 1] = Math.min(255, dataArray[i + 1] + color.g * 255 * alfa);
+        dataArray[i + 2] = Math.min(255, dataArray[i + 2] + color.b * 255 * alfa);
     }
 }
 
@@ -158,7 +189,7 @@ function AddUI(scene: BABYLON.Scene) {
     colorPicker.width = "250px";
     colorPicker.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
     colorPicker.onValueChangedObservable.add(function (value) { // value is a color3
-        UpdatePantsTexture(scene, "models/Pants2/texture_label.png", value);
+        UpdatePantsTexture(scene, "models/Pants2/texture_fxxxer.png", value);
     });
 
     colorPanel.addControl(colorPicker);

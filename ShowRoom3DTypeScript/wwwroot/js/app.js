@@ -34,27 +34,46 @@ function createScene(engine, canvas) {
     return scene;
 }
 function UpdatePantsTexture(scene, featureTexture, featureColor) {
-    var baseMaterial = scene.getMaterialByName("pantsMaterial");
-    var baseTexture = new BABYLON.Texture("models/Pants2/texture_pants.png", scene, null, null, null, function () {
-        var feature1Texture = new BABYLON.Texture(featureTexture, scene, null, null, null, function () {
-            var size = baseTexture.getSize();
-            var dataArray = new Uint8Array(size.width * size.height * 4);
-            var basePixels = baseTexture.readPixels();
-            for (var i = 0; i < dataArray.length; i++) {
-                dataArray[i] = basePixels[i];
-            }
-            baseMaterial.albedoTexture = BABYLON.RawTexture.CreateRGBATexture(dataArray, size.width, size.height, scene);
-            //AddToTexture(feature1Texture.readPixels(), featureColor, dataArray);
+    if (!window.BaseTexture || !window.Feature1Texture) {
+        window.BaseTexture = new BABYLON.Texture("models/Pants2/texture_pants.png", scene, null, null, null, function () {
+            window.Feature1Texture = new BABYLON.Texture(featureTexture, scene, null, null, null, function () {
+                window.BaseTextureData = window.BaseTexture.readPixels();
+                window.Feature1TextureData = window.Feature1Texture.readPixels();
+                UpdatePantsTexture_Private(scene, window.Feature1TextureData, featureColor);
+            });
         });
-    });
+    }
+    else {
+        UpdatePantsTexture_Private(scene, window.Feature1TextureData, featureColor);
+    }
+}
+function UpdatePantsTexture_Private(scene, featureTextureData, featureColor) {
+    if (!window.PantsTexture) {
+        var size = window.BaseTexture.getSize();
+        window.PantsTextureDate = new Uint8Array(size.width * size.height * 4);
+        window.PantsTexture = BABYLON.RawTexture.CreateRGBATexture(window.PantsTextureDate, size.width, size.height, scene, null, true);
+        window.PantsTexture.wrapU = window.BaseTexture.wrapU;
+        window.PantsTexture.wrapV = window.BaseTexture.wrapV;
+        window.PantsTexture.wrapR = window.BaseTexture.wrapR;
+        window.PantsTexture.invertZ = window.BaseTexture.invertZ;
+        var baseMaterial = scene.getMaterialByName("pantsMaterial");
+        baseMaterial.albedoTexture = window.PantsTexture;
+    }
+    var pantsTextureData = window.PantsTextureDate;
+    var basePixels = window.BaseTextureData;
+    for (var i = 0; i < pantsTextureData.length; i++) {
+        pantsTextureData[i] = basePixels[i];
+    }
+    AddToTexture(featureTextureData, featureColor, pantsTextureData);
+    window.PantsTexture.update(pantsTextureData);
 }
 function AddToTexture(pixels, color, dataArray) {
-    for (var i = 0; i < dataArray.length; i += 4) {
-        var alfa = pixels[i + 3] / 255.0;
-        dataArray[i] += color.r * 255.0 * alfa;
-        dataArray[i + 1] += color.g * 255.0 * alfa;
-        dataArray[i + 2] += color.b * 255.0 * alfa;
-        dataArray[i + 3] = 255;
+    var alfa = 0;
+    for (var i = 0; i < dataArray.byteLength; i += 4) {
+        alfa = pixels[i + 3] / 255;
+        dataArray[i] = Math.min(255, dataArray[i] + color.r * 255 * alfa);
+        dataArray[i + 1] = Math.min(255, dataArray[i + 1] + color.g * 255 * alfa);
+        dataArray[i + 2] = Math.min(255, dataArray[i + 2] + color.b * 255 * alfa);
     }
 }
 function AddCamera(scene, canvas) {
@@ -136,7 +155,7 @@ function AddUI(scene) {
     colorPicker.width = "250px";
     colorPicker.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
     colorPicker.onValueChangedObservable.add(function (value) {
-        UpdatePantsTexture(scene, "models/Pants2/texture_label.png", value);
+        UpdatePantsTexture(scene, "models/Pants2/texture_fxxxer.png", value);
     });
     colorPanel.addControl(colorPicker);
     var madeByPanel = new window.BABYLON.GUI.StackPanel();
