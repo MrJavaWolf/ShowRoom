@@ -36,16 +36,16 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
         let pants = scene.getMeshByName("pants_base_mesh");
         pants.scaling.x = 0.01;
         pants.scaling.y = 0.01;
-        pants.scaling.z = 0.01;
+        pants.scaling.z = -0.01;
         pants.rotation.x = 0;
-        pants.rotation.y = Math.PI;
+        pants.rotation.y = 0;
         pants.rotation.z = 0;
 
         let baseMaterial = new BABYLON.PBRMaterial("pantsMaterial", scene);
         baseMaterial.metallic = 0.26;
         baseMaterial.roughness = 0.15;
-        //let bumpTexture = new BABYLON.Texture("models/Pants2/normal_piping.png", scene, null, true);
-        //baseMaterial.bumpTexture = bumpTexture ;
+        let bumpTexture = new BABYLON.Texture("models/Pants2/normal_piping.png", scene, null);
+        baseMaterial.bumpTexture = bumpTexture ;
         let detailMap = new BABYLON.Texture("models/Pants2/normal_skin.png", scene);
         detailMap.uScale = 75;
         detailMap.vScale = 75;
@@ -62,9 +62,9 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
         let pantRivets = scene.getMeshByName("pants_base_rivet_mesh");
         pantRivets.scaling.x = 0.01;
         pantRivets.scaling.y = 0.01;
-        pantRivets.scaling.z = 0.01;
+        pantRivets.scaling.z = -0.01;
         pantRivets.rotation.x = 0;
-        pantRivets.rotation.y = Math.PI;
+        pantRivets.rotation.y = 0;
         pantRivets.rotation.z = 0;
 
         let baseMaterial = new BABYLON.PBRMaterial("pantsRivetMaterial", scene);
@@ -80,14 +80,14 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
         let pantsLabel = scene.getMeshByName("pants_base_label_mesh");
         pantsLabel.scaling.x = 0.01;
         pantsLabel.scaling.y = 0.01;
-        pantsLabel.scaling.z = 0.01;
+        pantsLabel.scaling.z = -0.01;
         pantsLabel.rotation.x = 0;
-        pantsLabel.rotation.y = Math.PI;
+        pantsLabel.rotation.y = 0;
         pantsLabel.rotation.z = 0;
 
         let baseMaterial = new BABYLON.PBRMaterial("pantsLableMaterial", scene);
-        baseMaterial.metallic = 0.9;
-        baseMaterial.roughness = 0.29;
+        baseMaterial.metallic = 0.1;
+        baseMaterial.roughness = 0.70;
         baseMaterial.albedoTexture = new BABYLON.Texture("models/Pants2/texture_label.png", scene);
         pantsLabel.material = baseMaterial;
     });
@@ -137,7 +137,7 @@ function UpdatePantsTexture_Private(scene: BABYLON.Scene, featureTextureData: Ar
         window.PantsTexture.wrapU = window.BaseTexture.wrapU;
         window.PantsTexture.wrapV = window.BaseTexture.wrapV;
         window.PantsTexture.wrapR = window.BaseTexture.wrapR;
-        window.PantsTexture.invertZ = window.BaseTexture.invertZ;
+        //window.PantsTexture.invertZ = window.BaseTexture.invertZ;
         let baseMaterial = scene.getMaterialByName("pantsMaterial") as BABYLON.PBRMaterial;
         baseMaterial.albedoTexture = window.PantsTexture;
     }
