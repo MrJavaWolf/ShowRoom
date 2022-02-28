@@ -8,6 +8,7 @@
   "dependencies": {
     "babylonjs": "^4.2.1",
     "babylonjs-gui": "^4.2.1",
+    "babylonjs-inspector": "^4.2.1",
     "babylonjs-loaders": "^4.2.1",
     "typescript": "^4.0.6"
   }

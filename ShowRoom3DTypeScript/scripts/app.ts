@@ -45,6 +45,16 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
         UpdatePantsTexture(scene, "models/Pants2/texture_fxxxer.png", new BABYLON.Color3(1, 0, 0));
     });
     AddUI(scene);
+
+    // Show inspector.
+    scene.debugLayer.show({
+        embedMode: true,
+        enablePopup: true,
+        overlay: true,
+        showExplorer: true,
+        showInspector: true
+    });
+
     return scene;
 }
 
