@@ -42,11 +42,18 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
         pants.rotation.z = 0;
 
         var baseMaterial = new BABYLON.PBRMaterial("pantsMaterial", scene);
-        baseMaterial.metallic = 0.2;
-        baseMaterial.roughness = 0.5;
-        //baseMaterial.sheen.isEnabled = true;
-        //baseMaterial.albedoTexture = new BABYLON.Texture("models/Pants2/texture_pants.png", scene);
+        baseMaterial.metallic = 0.26;
+        baseMaterial.roughness = 0.15;
+        //let bumpTexture = new BABYLON.Texture("models/Pants2/normal_piping.png", scene, null, true);
+        //baseMaterial.bumpTexture = bumpTexture ;
+        let detailMap = new BABYLON.Texture("models/Pants2/normal_skin.png", scene);
+        detailMap.uScale = 75;
+        detailMap.vScale = 75;
+        baseMaterial.detailMap.texture = detailMap;
+        baseMaterial.detailMap.isEnabled = true;
+        baseMaterial.metallicF0Factor = 0;
         pants.material = baseMaterial;
+        window.SelectedPipingColor = new BABYLON.Color3(1, 0, 0);
         UpdatePantsTexture(scene);
     });
     AddUI(scene);
@@ -118,7 +125,7 @@ function AddToTexture(pixels: ArrayBufferView, color: BABYLON.Color3, dataArray:
 }
 
 function AddCamera(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
-    let pointTarget = new BABYLON.Vector3(0, 1.5, 0)
+    let pointTarget = new BABYLON.Vector3(0, 1.75, 0)
     const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2, 7, pointTarget.clone(), scene);
     camera.attachControl(canvas, true);
     // Target the camera to scene origin
@@ -191,96 +198,181 @@ function AddUI(scene: BABYLON.Scene) {
 
     // GUI
     var advancedTexture = window.BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-
-    var colorPanel = new window.BABYLON.GUI.StackPanel();
-    colorPanel.width = "250px";
-    colorPanel.isVertical = true;
-    colorPanel.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-    colorPanel.verticalAlignment = window.BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
-    advancedTexture.addControl(colorPanel);
     AddMadeByLabels(advancedTexture);
-    AddChooseColorRadioGroupGui(advancedTexture, scene);
-    AddChoosePipingRadioButtonsGui(advancedTexture, scene);
+    let pipingButtonsPanel = AddChoosePipingButtonsGui(scene);
+    let colorButtonsPanel = AddChooseColorButtonsGui(scene);
+
+    //let uiPanel = new window.BABYLON.GUI.StackPanel("uiPanel");
+    //uiPanel.isVertical = false;
+    //uiPanel.addControl(pipingButtonsPanel);
+    //uiPanel.addControl(colorButtonsPanel);
+    //advancedTexture.addControl(uiPanel);
+    advancedTexture.addControl(colorButtonsPanel);
+    advancedTexture.addControl(pipingButtonsPanel);
 }
 
 
-function AddChoosePipingRadioButtonsGui(advancedTexture: globalThis.BABYLON.GUI.AdvancedDynamicTexture, scene: BABYLON.Scene) {
+function AddChoosePipingButtonsGui(scene: BABYLON.Scene) {
 
-    var selectBox = new window.BABYLON.GUI.SelectionPanel("ChoosePipingSelectionPanel");
-    selectBox.thickness = 1;
-    selectBox.paddingBottom = 5;
-    selectBox.paddingTop = 5;
-    selectBox.paddingLeft = 5;
-    selectBox.paddingRight = 5;
-    selectBox.background = "#111111";
-    selectBox.barColor = "#111111";
-    selectBox.shadowColor = "#111111";
-    selectBox.labelColor = "#DDDDDD";
-    selectBox.headerColor = "#DDDDDD";
-    selectBox.color = "#DDDDDD";
-    selectBox.fontStyle = "Verdana";
-    selectBox.widthInPixels = 150;
-    selectBox.heightInPixels = 150;
-    selectBox.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-    selectBox.verticalAlignment = window.BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-    var colorGroup = new window.BABYLON.GUI.RadioGroup("PipingGroup");
-    colorGroup.header = "- Piping -";
-    colorGroup.addRadio("Fxxxer", function (value) {
+    let pipingButtonsPanel = new window.BABYLON.GUI.StackPanel("PipingButtonsPanel");
+    pipingButtonsPanel.isVertical = true;
+    pipingButtonsPanel.width = "200px";
+    pipingButtonsPanel.paddingBottom = 5;
+    pipingButtonsPanel.paddingTop = 5;
+    pipingButtonsPanel.paddingLeft = 5;
+    pipingButtonsPanel.paddingRight = 5;
+    pipingButtonsPanel.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+    pipingButtonsPanel.verticalAlignment = window.BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+
+    let selectedColor = "#555555";
+    let nonSelectedColor = "#222222";
+
+    var fxxxerButton = window.BABYLON.GUI.Button.CreateSimpleButton("FxxxerButton", "Fxxxer");
+    fxxxerButton.paddingBottom = 5;
+    fxxxerButton.width = "150px";
+    fxxxerButton.height = "75px";
+    fxxxerButton.cornerRadius = 5;
+    fxxxerButton.color = "#DDDDDD";
+    fxxxerButton.fontFamily = "Verdana";
+    fxxxerButton.fontSize = 27;
+    fxxxerButton.background = selectedColor;
+    fxxxerButton.thickness = 0;
+    fxxxerButton.onPointerDownObservable.add(() => {
+        fxxxerButton.background = selectedColor;
+        indicatorButton.background = nonSelectedColor;
         window.SelectedPipingData = window.PipingTexture1Data;
         UpdatePantsTexture(scene);
-    }, true);
-    colorGroup.addRadio("Indicator", function (value) {
+    });
+    fxxxerButton.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+    pipingButtonsPanel.addControl(fxxxerButton);
+
+    var indicatorButton = window.BABYLON.GUI.Button.CreateSimpleButton("IndicatorButton", "Indicator");
+    indicatorButton.width = "150px";
+    indicatorButton.height = "75px";
+    indicatorButton.cornerRadius = 5;
+    indicatorButton.color = "#DDDDDD";
+    indicatorButton.fontFamily = "Verdana";
+    indicatorButton.fontSize = 27;
+    indicatorButton.background = nonSelectedColor;
+    indicatorButton.thickness = 0;
+    indicatorButton.onPointerDownObservable.add(() => {
+        indicatorButton.background = selectedColor;
+        fxxxerButton.background = nonSelectedColor;
         window.SelectedPipingData = window.PipingTexture2Data;
         UpdatePantsTexture(scene);
-    }, false);
-    selectBox.addGroup(colorGroup);
-    advancedTexture.addControl(selectBox);
+    });
+    indicatorButton.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+    pipingButtonsPanel.addControl(indicatorButton);
+
+    return pipingButtonsPanel;
 }
 
 
+function AddChooseColorButtonsGui(scene: BABYLON.Scene) {
 
-function AddChooseColorRadioGroupGui(advancedTexture: globalThis.BABYLON.GUI.AdvancedDynamicTexture, scene: BABYLON.Scene) {
+    let colorButtonsPanel = new window.BABYLON.GUI.StackPanel("ColorButtonsPanel");
+    colorButtonsPanel.isVertical = true;
+    colorButtonsPanel.width = "200px";
+    colorButtonsPanel.paddingBottom = 5;
+    colorButtonsPanel.paddingTop = 5;
+    colorButtonsPanel.paddingLeft = 5;
+    colorButtonsPanel.paddingRight = 5;
+    colorButtonsPanel.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+    colorButtonsPanel.verticalAlignment = window.BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
 
-    var selectBox = new window.BABYLON.GUI.SelectionPanel("ChooseColorSelectionPanel");
-    selectBox.thickness = 1;
-    selectBox.paddingBottom = 5;
-    selectBox.paddingTop = 5;
-    selectBox.paddingLeft = 5;
-    selectBox.paddingRight = 5;
-    selectBox.fontSize = "35";
-    selectBox.background = "#111111";
-    selectBox.barColor = "#111111";
-    selectBox.shadowColor = "#111111";
-    selectBox.labelColor = "#DDDDDD";
-    selectBox.headerColor = "#DDDDDD";
-    selectBox.color = "#DDDDDD";
-    selectBox.fontStyle = "Verdana";
-    selectBox.heightInPixels = 200;
-    selectBox.widthInPixels = 150;
-    selectBox.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-    selectBox.verticalAlignment = window.BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-    var colorGroup = new window.BABYLON.GUI.RadioGroup("colorGroup");
-    colorGroup.header = "- Color -";
-    colorGroup.addRadio("None", function (value) {
+    let selectedColor = "#555555";
+    let nonSelectedColor = "#222222";
+
+    var noneButton = window.BABYLON.GUI.Button.CreateSimpleButton("NoneColorButton", "None");
+    noneButton.paddingBottom = 5;
+    noneButton.width = "150px";
+    noneButton.height = "75px";
+    noneButton.cornerRadius = 5;
+    noneButton.color = "#DDDDDD";
+    noneButton.fontFamily = "Verdana";
+    noneButton.fontSize = 27;
+    noneButton.background = nonSelectedColor;
+    noneButton.thickness = 0;
+    noneButton.onPointerDownObservable.add(() => {
+        noneButton.background = selectedColor;
+        blueButton.background = nonSelectedColor;
+        redButton.background = nonSelectedColor;
+        yellowButton.background = nonSelectedColor;
+
         window.SelectedPipingColor = new BABYLON.Color3(0, 0, 0);
         UpdatePantsTexture(scene);
-    }, false);
-    colorGroup.addRadio("Blue", function (value) {
+    });
+    noneButton.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+    colorButtonsPanel.addControl(noneButton);
+
+    var blueButton = window.BABYLON.GUI.Button.CreateSimpleButton("BlueButton", "Blue");
+    blueButton.paddingBottom = 5;
+    blueButton.width = "150px";
+    blueButton.height = "75px";
+    blueButton.cornerRadius = 5;
+    blueButton.color = "#DDDDDD";
+    blueButton.fontFamily = "Verdana";
+    blueButton.fontSize = 27;
+    blueButton.background = nonSelectedColor;
+    blueButton.thickness = 0;
+    blueButton.onPointerDownObservable.add(() => {
+        noneButton.background = nonSelectedColor;
+        blueButton.background = selectedColor;
+        redButton.background = nonSelectedColor;
+        yellowButton.background = nonSelectedColor;
         window.SelectedPipingColor = new BABYLON.Color3(0.2, 0.4, 1);
         UpdatePantsTexture(scene);
-    }, false);
-    colorGroup.addRadio("Red", function (value) {
+    });
+    blueButton.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+    colorButtonsPanel.addControl(blueButton);
+
+
+    var redButton = window.BABYLON.GUI.Button.CreateSimpleButton("RedButton", "Red");
+    redButton.paddingBottom = 5;
+    redButton.width = "150px";
+    redButton.height = "75px";
+    redButton.cornerRadius = 5;
+    redButton.color = "#DDDDDD";
+    redButton.fontFamily = "Verdana";
+    redButton.fontSize = 27;
+    redButton.background = selectedColor;
+    redButton.thickness = 0;
+    redButton.onPointerDownObservable.add(() => {
+        noneButton.background = nonSelectedColor;
+        blueButton.background = nonSelectedColor;
+        redButton.background = selectedColor;
+        yellowButton.background = nonSelectedColor;
         window.SelectedPipingColor = new BABYLON.Color3(1, 0, 0);
         UpdatePantsTexture(scene);
-    }, true);
-    colorGroup.addRadio("Yellow", function (value) {
+    });
+    redButton.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+    colorButtonsPanel.addControl(redButton);
+
+
+    var yellowButton = window.BABYLON.GUI.Button.CreateSimpleButton("YellowButton", "Yellow");
+    yellowButton.width = "150px";
+    yellowButton.height = "75px";
+    yellowButton.cornerRadius = 5;
+    yellowButton.color = "#DDDDDD";
+    yellowButton.fontFamily = "Verdana";
+    yellowButton.fontSize = 27;
+    yellowButton.background = nonSelectedColor;
+    yellowButton.thickness = 0;
+    yellowButton.onPointerDownObservable.add(() => {
+        noneButton.background = nonSelectedColor;
+        blueButton.background = nonSelectedColor;
+        redButton.background = nonSelectedColor;
+        yellowButton.background = selectedColor;
         window.SelectedPipingColor = new BABYLON.Color3(1, 1, 0);
         UpdatePantsTexture(scene);
-    }, false);
-    
-    selectBox.addGroup(colorGroup);
-    advancedTexture.addControl(selectBox);
+    });
+    yellowButton.horizontalAlignment = window.BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+    colorButtonsPanel.addControl(yellowButton);
+
+    return colorButtonsPanel;
 }
+
+
 
 function AddMadeByLabels(advancedTexture: globalThis.BABYLON.GUI.AdvancedDynamicTexture) {
     var madeByPanel = new window.BABYLON.GUI.StackPanel();
