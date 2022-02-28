@@ -37,6 +37,22 @@ function createScene(engine, canvas) {
         window.SelectedPipingColor = new BABYLON.Color3(1, 0, 0);
         UpdatePantsTexture(scene);
     });
+    BABYLON.SceneLoader.Append("models/Pants2/", "pants_base_rivet_mesh.obj", scene, function (scene) {
+        // do something with the scene
+        var pantRivets = scene.getMeshByName("pants_base_rivet_mesh");
+        pantRivets.scaling.x = 0.01;
+        pantRivets.scaling.y = 0.01;
+        pantRivets.scaling.z = 0.01;
+        pantRivets.rotation.x = 0;
+        pantRivets.rotation.y = Math.PI;
+        pantRivets.rotation.z = 0;
+        var baseMaterial = new BABYLON.PBRMaterial("pantsRivetMaterial", scene);
+        baseMaterial.metallic = 0.9;
+        baseMaterial.roughness = 0.29;
+        baseMaterial.reflectionTexture = new BABYLON.Texture("models/Pants2/reflection_map.jpg", scene);
+        baseMaterial.metallicTexture = new BABYLON.Texture("models/Pants2/reflection_map.jpg", scene);
+        pantRivets.material = baseMaterial;
+    });
     AddUI(scene);
     //// Show inspector.
     //scene.debugLayer.show({
