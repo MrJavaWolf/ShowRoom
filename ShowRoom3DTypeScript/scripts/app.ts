@@ -75,16 +75,34 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
         pantRivets.material = baseMaterial;
     });
 
+    BABYLON.SceneLoader.Append("models/Pants2/", "pants_base_label_mesh.obj", scene, function (scene) {
+        // do something with the scene
+        let pantsLabel = scene.getMeshByName("pants_base_label_mesh");
+        pantsLabel.scaling.x = 0.01;
+        pantsLabel.scaling.y = 0.01;
+        pantsLabel.scaling.z = 0.01;
+        pantsLabel.rotation.x = 0;
+        pantsLabel.rotation.y = Math.PI;
+        pantsLabel.rotation.z = 0;
+
+        let baseMaterial = new BABYLON.PBRMaterial("pantsLableMaterial", scene);
+        baseMaterial.metallic = 0.9;
+        baseMaterial.roughness = 0.29;
+        baseMaterial.albedoTexture = new BABYLON.Texture("models/Pants2/texture_label.png", scene);
+        pantsLabel.material = baseMaterial;
+    });
+
+
     AddUI(scene);
 
-    //// Show inspector.
-    //scene.debugLayer.show({
-    //    embedMode: true,
-    //    enablePopup: true,
-    //    overlay: true,
-    //    showExplorer: true,
-    //    showInspector: true
-    //});
+    // Show inspector.
+    scene.debugLayer.show({
+        embedMode: true,
+        enablePopup: true,
+        overlay: true,
+        showExplorer: true,
+        showInspector: true
+    });
 
     return scene;
 }
